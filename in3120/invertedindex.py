@@ -11,6 +11,8 @@ from .tokenizer import Tokenizer
 from .corpus import Corpus
 from .posting import Posting
 from .postinglist import CompressedInMemoryPostingList, InMemoryPostingList, PostingList
+#extra import?
+import document
 
 
 class InvertedIndex(ABC):
@@ -79,13 +81,46 @@ class InMemoryInvertedIndex(InvertedIndex):
         return str({term: self.__posting_lists[term_id] for (term, term_id) in self.__dictionary})
 
     def __build_index(self, fields: Iterable[str], compressed: bool) -> None:
-        raise NotImplementedError("You need to implement this as part of the assignment.")
+        # raise NotImplementedError("You need to implement this as part of the assignment.")
+        docs = [document]
+        for id in range(self.__corpus.size):
+            docs.append(self.__corpus.get_document[id])
+        
+        for field in fields:
+            freq = 0
+            for doc in docs:
+                while doc.get_field(field) is not None:
+                    self.__dictionary.add_if_absent(field)
+                    freq = freq + 1
+
+            PostingList.append_posting(Posting(doc.get_document_id, freq))
+
 
     def get_terms(self, buffer: str) -> Iterator[str]:
-        raise NotImplementedError("You need to implement this as part of the assignment.")
+        #raise NotImplementedError("You need to implement this as part of the assignment.")
+        # res = Iterator()
+        result_list = []
+        tokens = self.__tokenizer.tokens(buffer)
+        buffer = self.__tokenizer.join(tokens)
+        for s in buffer:
+            result_list.append(self.__normalizer.normalize(s))
 
+        return result_list
+    
     def get_postings_iterator(self, term: str) -> Iterator[Posting]:
-        raise NotImplementedError("You need to implement this as part of the assignment.")
+        #raise NotImplementedError("You need to implement this as part of the assignment.")
+        res = Iterator()[Posting]
+        if self.__dictionary.__contains__(term):
+            postings_list = self.__posting_lists[self.__dictionary.get_term_id(term)]
+            res = Iterator[Posting](postings_list)
+        
+        return res
+
 
     def get_document_frequency(self, term: str) -> int:
-        raise NotImplementedError("You need to implement this as part of the assignment.")
+        # raise NotImplementedError("You need to implement this as part of the assignment.")
+        if self.__dictionary.__contains__(term):
+            return len(self.__posting_lists[self.__dictionary.get_term_id(term)])
+        else:
+            return 0
+        
